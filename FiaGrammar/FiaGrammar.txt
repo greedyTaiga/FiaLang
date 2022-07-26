@@ -1,0 +1,60 @@
+﻿/*
+	Context-free grammar for Fia.
+*/
+program -> declaration* EOF ;
+
+declaration -> varDeclaration
+			 | funcDeclaration
+			 | statement ;
+
+varDeclaration	-> "var" IDENTIFIER ("=" expression)? ";" ;
+
+funcDeclaration -> "func" IDENTIFIER "(" parameters? ")" block ;
+parameters		-> IDENTIFIER ("," IDENTIFIER)* ;
+
+statement -> exprStatement
+		   | printStatement 
+		   | blockStatement
+		   | ifStatement 
+		   | whileStatement 
+		   | forStatement 
+		   | returnStatement ;
+
+returnStatement -> "return" expression? ";" ;
+
+whileStatement	-> "while" "(" expression ")" statement ;
+
+forStatement	-> "for" "(" (varDeclaration | exprStmt | ";")
+						expression? ";" expression? ")" statement ;
+
+ifStatement		-> "if" "(" expression ")" statement
+				   ("else" statement)? ;
+
+blockStatement	-> "{" declaration* "}" ;
+printStatement	-> "print" expression ";" ;
+exprStatement	-> expression ";" ;
+
+expression	-> assigment ;
+
+assigment	-> IDENTIFIER "=" expression
+			 | logic_or ;
+
+logic_or	-> logic_and ("or" logic_and)* ;
+logic_and	-> equality ("and" equality)* ;
+
+equality	-> comparison (("==" | "!=") comparison)* ;
+comparison	-> term ( ("<=" | ">=" | "<" | ">") term )*;
+term		-> factor ( ("+" | "-") factor )* ;
+factor		-> unary ( ("/" | "*") unary )* ;
+unary		-> ("!" | "-") unary 
+			   | literal ;
+
+funCall		-> primary ("(" arguments? ")")* ;
+
+arguments	-> expression ("," expression)* ;
+
+primary		-> "true" | "false" | "nil"
+			   | NUMBER | STRING
+			   | "(" expression ")" 
+			   | IDENTIFIER ;
+
