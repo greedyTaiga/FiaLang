@@ -1,10 +1,12 @@
-﻿namespace Fia
+﻿using System;
+namespace Fia
 {
     public class Fia
     {
         private static readonly Interpreter interpreter = new Interpreter();
         private static bool errorEncountered = false;
 
+        
         public static void Main(string[] args)
         {
             
@@ -17,7 +19,7 @@
                 var path = args[0];
                 string? text;
 
-                if(Uri.IsWellFormedUriString(path, UriKind.Absolute))
+                if(File.Exists(path))
                 {
                     text = File.ReadAllText(path);
                 }
@@ -52,6 +54,8 @@
         }
         private static void Run(string text)
         {
+            errorEncountered = false;
+
             var scanner = new Scanner(text);
             var tokens = scanner.ScanTokens();
 
@@ -65,7 +69,6 @@
             if (errorEncountered) return;
 
             interpreter.Interpret(statements);
-
         }
 
         internal static void Error(string message, int line)
