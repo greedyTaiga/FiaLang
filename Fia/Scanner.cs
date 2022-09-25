@@ -201,13 +201,15 @@ namespace Fia
 
         private void SkipLine()
         {
-            while (source[current] < source.Length && source[current] != '\n')
+            Console.WriteLine("Trying to skip a line.");
+            while (current < source.Length && source[current] != '\n')
             {
                 current++;
             }
-
+            Console.WriteLine("Success.");
             if (current < source.Length) current++;
             line++;
+            
         }
 
         //Helper functions.
