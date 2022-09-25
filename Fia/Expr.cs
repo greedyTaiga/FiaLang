@@ -10,6 +10,9 @@ public abstract R Accept<R>(IVisitor<R> visitor);   public interface IVisitor<R>
       public R VisitAssigment(Expr.Assigment assigment);
       public R VisitLogical(Expr.Logical logical);
       public R VisitCall(Expr.Call call);
+      public R VisitGet(Expr.Get get);
+      public R VisitSet(Expr.Set set);
+      public R VisitThisRef(Expr.ThisRef thisref);
 }
 public class Unary : Expr {
 public readonly Token oper;
@@ -90,6 +93,36 @@ this.arguments = arguments;
 }
 public override R Accept<R>(IVisitor<R> visitor){
 return visitor.VisitCall(this);}
+}
+public class Get : Expr {
+public readonly Expr obj;
+public readonly Token name;
+public Get (Expr obj, Token name) {
+this.obj = obj;
+this.name = name;
+}
+public override R Accept<R>(IVisitor<R> visitor){
+return visitor.VisitGet(this);}
+}
+public class Set : Expr {
+public readonly Expr obj;
+public readonly Token name;
+public readonly Expr value;
+public Set (Expr obj, Token name, Expr value) {
+this.obj = obj;
+this.name = name;
+this.value = value;
+}
+public override R Accept<R>(IVisitor<R> visitor){
+return visitor.VisitSet(this);}
+}
+public class ThisRef : Expr {
+public readonly Token keyword;
+public ThisRef (Token keyword) {
+this.keyword = keyword;
+}
+public override R Accept<R>(IVisitor<R> visitor){
+return visitor.VisitThisRef(this);}
 }
 }
 }

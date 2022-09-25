@@ -7,13 +7,20 @@ namespace Fia
     {
         private readonly Interpreter interpreter;
         private readonly List<Dictionary<string, bool>> scopes;
-
-        private FunctionType currentFunction = FunctionType.NONE;
+        private enum ClassType
+        {
+            NONE,
+            CLASS
+        }
         private enum FunctionType
         {
-            NONE, 
-            FUNCTION
+            NONE,
+            FUNCTION,
+            INIT,
+            METHOD
         }
+        private FunctionType currentFunction = FunctionType.NONE;
+        private ClassType currentClass = ClassType.NONE;
 
         public Resolver(Interpreter interpreter)
         {
@@ -56,7 +63,15 @@ namespace Fia
                 Fia.Error("Can't return outside of a function.", stmt.keyword.line);
             }
 
-            if (stmt.value != null) Resolve(stmt.value);
+            if (stmt.value != null)
+            {
+                if (currentFunction == FunctionType.INIT)
+                {
+                    Fia.Error("Can't return from an initializer.", stmt.keyword.line);
+                }
+
+                Resolve(stmt.value);
+            }
             return new None();
         }
 
@@ -65,11 +80,39 @@ namespace Fia
             Resolve(stmt.val);
             return new None();
         }
-        public None VisitBlock(Stmt.Block block)
+        public None VisitBlock(Stmt.Block stmt)
         {
             BeginScope();
-            Resolve(block.statements);
+            Resolve(stmt.statements);
             EndScope();
+            return new None();
+        }
+
+        public None VisitClassObj(Stmt.ClassObj stmt) {
+            var enclosingClass = currentClass;
+            currentClass = ClassType.CLASS;
+
+            Declare(stmt.name);
+            Define(stmt.name);
+
+            BeginScope();
+            scopes.Last()["this"] = true;
+
+            foreach (var method in stmt.methods)
+            {
+                var declaration = FunctionType.METHOD;
+
+                if (method.name.lexeme == "init")
+                {
+                    declaration = FunctionType.INIT;
+                }
+
+                ResolveFunction(method, declaration);
+            }
+
+            EndScope();
+
+            currentClass = enclosingClass;
             return new None();
         }
 
@@ -113,6 +156,25 @@ namespace Fia
             return new None();
         }
 
+        public None VisitSet(Expr.Set expr)
+        {
+            Resolve(expr.value);
+            Resolve(expr.obj);
+
+            return new None();
+        }
+
+        public None VisitThisRef(Expr.ThisRef expr)
+        {
+            if (currentClass == ClassType.NONE)
+            {
+                Fia.Error("Can't use 'this' outside of a class.", expr.keyword.line);
+                return new None();
+            }
+            ResolveLocal(expr, expr.keyword);
+            return new None();
+        }
+
         public None VisitUnary(Expr.Unary expr)
         {
             Resolve(expr.right);
@@ -141,7 +203,13 @@ namespace Fia
             }
 
             return new None();
-        } 
+        }
+
+        public None VisitGet(Expr.Get expr)
+        {
+            Resolve(expr.obj);
+            return new None();
+        }
 
         public None VisitAssigment(Expr.Assigment expr)
         {

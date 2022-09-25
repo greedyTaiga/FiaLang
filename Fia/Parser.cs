@@ -37,24 +37,37 @@ namespace Fia
         //Statements
         private Stmt Declaration()
         {
-            if (Match(VAR))
-            {
-                return VarDeclaration();
-            }
-            if (Match(FUNC))
-            {
-                return FuncDeclaration();
-            }
+            if (Match(VAR))return VarDeclaration();
+            if (Match(CLASS)) return ClassDeclaration();
+            if (Match(FUNC)) return FuncDeclaration("function");
+
 
 
             return Statement();
         }
 
-        private Stmt FuncDeclaration()
+        private Stmt.ClassObj ClassDeclaration()
         {
-            var name = Consume(IDENTIFIER, "Expect function name after 'func'.");
+            Token name = Consume(IDENTIFIER, "Expect class name.");
+            Consume(LEFT_BRACE, "Expect '{' before clas body.");
 
-            Consume(LEFT_PAREN, "Expect '(' after function name.");
+            var methods = new List<Stmt.Function>();
+            while (!Check(RIGHT_BRACE) && !ReachedEnd())
+            {
+                Consume(FUNC, "Expect method declaration in class.");
+                methods.Add(FuncDeclaration("method"));
+            }
+
+            Consume(RIGHT_BRACE, "Expect '}' after class body.");
+
+            return new Stmt.ClassObj(name, methods);
+        }
+
+        private Stmt.Function FuncDeclaration(string kind)
+        {
+            var name = Consume(IDENTIFIER, $"Expect {kind} name.");
+            Consume(LEFT_PAREN, $"Expect '(' after {kind} name.");
+
             var parameters = Parameters();
             Consume(RIGHT_PAREN, "Expect ')' after parameters.");
 
@@ -79,7 +92,7 @@ namespace Fia
             return parameters;
         }
 
-        private Stmt VarDeclaration()
+        private Stmt.Var VarDeclaration()
         {
             Token name = Consume(IDENTIFIER, "Expect variable name after 'var'.");
             Expr? init = null;
@@ -104,7 +117,7 @@ namespace Fia
             return ExpressionStatement();
         }
 
-        private Stmt Returning()
+        private Stmt.Returning Returning()
         {
             Token keyword = Previous();
             Expr? val = null;
@@ -118,7 +131,7 @@ namespace Fia
             return new Stmt.Returning(keyword, val);
         }
 
-        private Stmt Block()
+        private Stmt.Block Block()
         {
             var statements = new List<Stmt>();
             while(!ReachedEnd() && !Check(RIGHT_BRACE))
@@ -131,7 +144,7 @@ namespace Fia
             return new Stmt.Block(statements);
         }
 
-        private Stmt Conditional()
+        private Stmt.Conditional Conditional()
         {
             Consume(LEFT_PAREN, "Expect '(' after 'if'.");
             Expr condition = Expression();
@@ -147,7 +160,7 @@ namespace Fia
             return new Stmt.Conditional(condition, thenBranch, elseBranch);
         }
 
-        private Stmt Loop()
+        private Stmt.Loop Loop()
         {
             Consume(LEFT_PAREN, "Expect '(' after 'if'.");
             Expr condition = Expression();
@@ -242,6 +255,11 @@ namespace Fia
                 {
                     Token name = ((Expr.Variable)expr).name;
                     return new Expr.Assigment(name, val);
+                }
+                else if (expr is Expr.Get)
+                {
+                    var get = (Expr.Get)expr;
+                    return new Expr.Set(get.obj, get.name, val);
                 }
                 Error(token, "Invalid assigment.");
             }
@@ -338,30 +356,42 @@ namespace Fia
         private Expr Call()
         {
             Expr expr = Primary();
-            while(Match(LEFT_PAREN))
+            while(true)
             {
-                var args = Arguments();
-                Token token =
-                    Consume(RIGHT_PAREN, "Expect ')' at the end of function call");
-                expr = new Expr.Call(expr, token, args);
+                if (Match(LEFT_PAREN))
+                {
+                    expr = FinishCall(expr);
+                }
+                if (Match(DOT))
+                {
+                    var name = Consume(IDENTIFIER, "Expect property name after '.'.");
+                    expr = new Expr.Get(expr, name);
+                }
+                else
+                {
+                    break;
+                }
             }
             return expr;
         }
 
-        private List<Expr> Arguments()
+        private Expr.Call FinishCall(Expr expr)
         {
             var args = new List<Expr>();
 
-            while (!Check(RIGHT_PAREN))
+            if (!Check(RIGHT_PAREN))
             {
-                if (args.Count > 0) Consume(COMMA, "Expect ',' between arguments.");
-                if (args.Count > 255) Error(Peek(), "Can't have more than 255 arguments.");
-                Expr arg = Expression();
-                args.Add(arg);
+                do
+                {
+                    args.Add(Expression());
+                } while (Match(COMMA));
             }
 
-            return args;
+            var paren = Consume(RIGHT_PAREN, "Expect ')' after arguments.");
+
+            return new Expr.Call(expr, paren, args);
         }
+
 
         private Expr Primary()
         {
@@ -383,6 +413,8 @@ namespace Fia
                 Consume(RIGHT_PAREN, "No closing parenthesis.");
                 return new Expr.Grouping(expr);
             }
+
+            if (Match(out token, THIS)) return new Expr.ThisRef(token);
 
             if (Match(out token, IDENTIFIER))
             {

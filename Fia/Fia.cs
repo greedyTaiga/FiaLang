@@ -9,7 +9,13 @@ namespace Fia
         
         public static void Main(string[] args)
         {
+            var p = @"C:\Users\alger\Desktop\Prog\C# Projects\FiaLang\DevelopmentTools\test.fia";
+            var t = File.ReadAllText(p);
+            Run(t);
+            return;
+
             
+
             if (args.Length == 0)
             {
                 RunPrompt();

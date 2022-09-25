@@ -36,6 +36,24 @@ namespace Fia
         //They all have None as a return type, which is an empty class.
         //None is used because C# doesn't allow void type in generics.
 
+        public None VisitClassObj(Stmt.ClassObj stmt)
+        {
+            env.Define(stmt.name, null);
+            
+            var methods = new Dictionary<String, FiaFunction>();
+            foreach (var method in stmt.methods)
+            {
+                var function = new FiaFunction(method, env, 
+                    method.name.lexeme == "init");
+                methods[method.name.lexeme] = function;
+            }
+
+            FiaClass classObj = new FiaClass(stmt.name.lexeme, methods);
+            env.Assign(stmt.name, classObj);
+
+            return new None();
+        }
+
         public None VisitFunction(Stmt.Function declaration)
         {
             var function = new FiaFunction(declaration, env);
@@ -119,6 +137,7 @@ namespace Fia
 
         public None VisitVar(Stmt.Var var)
         {
+            
             env.Define(var.name, Evaluate(var.init));
 
             return new None();
@@ -129,8 +148,9 @@ namespace Fia
         
         public object? VisitCall(Expr.Call call)
         {
+            
             var callee = Evaluate(call.callee);
-
+            
             if (callee is not IFiaCallable)
             {
                 throw new RuntimeError(call.paren, $"Can only call functions and classes.");
@@ -152,7 +172,7 @@ namespace Fia
 
             try
             {
-                function.Call(this, args);
+                return function.Call(this, args);
             }
             catch (Return r) {
                 return r.val;
@@ -161,20 +181,53 @@ namespace Fia
             return null;
         }
 
+        public object? VisitGet(Expr.Get get)
+        {
+            var obj = Evaluate(get.obj);
+
+            if (obj is FiaInstance)
+            {
+                return ((FiaInstance)obj).Get(get.name);
+            }
+
+            throw new RuntimeError(get.name, "Only class instances have properties.");
+        }
+
+        public object? VisitSet(Expr.Set set)
+        {
+            var obj = Evaluate(set.obj);
+
+            if(obj is not FiaInstance) {
+                throw new RuntimeError(set.name, "Only instances have fields.");
+            }
+
+            object? value = Evaluate(set.value);
+
+            ((FiaInstance)obj).Set(set.name, value);
+
+            return value;
+
+        }
+
+        public object? VisitThisRef(Expr.ThisRef expr)
+        {
+            return LookUpVariable(expr.keyword, expr);
+        }
+
         public object? VisitAssigment(Expr.Assigment assigment)
         {
-            var val = Evaluate(assigment.value);
+            var value = Evaluate(assigment.value);
 
             if (locals.TryGetValue(assigment, out int distance))
             {
-                env.AssignAt(distance, assigment.name, val);
+                env.AssignAt(distance, assigment.name, value);
             }
             else
             {
-                globalEnv.Assign(assigment.name, val);
+                globalEnv.Assign(assigment.name, value);
             }
 
-            return val;
+            return value;
         }
         public object? VisitBinary(Expr.Binary binary)
         {

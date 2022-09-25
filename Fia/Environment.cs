@@ -25,6 +25,12 @@ namespace Fia
                 $"Variable '{name}' already exists in this context.");
         }
 
+        public void InternalDefine(string name, Object? value)
+        {
+            values.Add(name, value);
+            return;
+        }
+
         public void Assign(Token variable, Object? value)
         {
             string name = variable.lexeme;

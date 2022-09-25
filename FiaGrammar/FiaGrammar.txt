@@ -3,14 +3,18 @@
 */
 program -> declaration* EOF ;
 
-declaration -> varDeclaration
+declaration -> classDeclaration
+			 | varDeclaration
 			 | funcDeclaration
 			 | statement ;
 
-varDeclaration	-> "var" IDENTIFIER ("=" expression)? ";" ;
+classDeclaration	-> "class" IDENTIFIER "{" function* "}" ;
 
-funcDeclaration -> "func" IDENTIFIER "(" parameters? ")" block ;
-parameters		-> IDENTIFIER ("," IDENTIFIER)* ;
+varDeclaration		-> "var" IDENTIFIER ("=" expression)? ";" ;
+
+funcDeclaration		-> "func" function ;
+function			-> IDENTIFIER "(" parameters? ")" block ;
+parameters			-> IDENTIFIER ("," IDENTIFIER)* ;
 
 statement -> exprStatement
 		   | printStatement 
@@ -36,7 +40,7 @@ exprStatement	-> expression ";" ;
 
 expression	-> assigment ;
 
-assigment	-> IDENTIFIER "=" expression
+assigment	-> (call ".")? IDENTIFIER "=" expression
 			 | logic_or ;
 
 logic_or	-> logic_and ("or" logic_and)* ;
@@ -49,9 +53,9 @@ factor		-> unary ( ("/" | "*") unary )* ;
 unary		-> ("!" | "-") unary 
 			   | literal ;
 
-funCall		-> primary ("(" arguments? ")")* ;
+call		-> primary ("(" arguments? ")")* ;
 
-arguments	-> expression ("," expression)* ;
+arguments	-> expression ("," expression | "." IDENTIFIER)* ;
 
 primary		-> "true" | "false" | "nil"
 			   | NUMBER | STRING

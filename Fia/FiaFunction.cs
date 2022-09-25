@@ -10,10 +10,13 @@ namespace Fia
     {
         private readonly Environment closure;
         private readonly Stmt.Function declaration;
-        public FiaFunction(Stmt.Function declaration, Environment closure)
+        private readonly bool isInit;
+        public FiaFunction(Stmt.Function declaration, Environment closure, 
+            bool isInit = false)
         {
             this.declaration = declaration;
             this.closure = closure;
+            this.isInit = isInit;
         }
         public int Arity()
         {
@@ -31,6 +34,13 @@ namespace Fia
 
             interpreter.ExecuteBlock(declaration.body, env);
             return null;
+        }
+
+        public FiaFunction Bind(FiaInstance instance)
+        {
+            var env = new Environment(closure);
+            env.InternalDefine("this", instance);
+            return new FiaFunction(declaration, env);
         }
     }
 }

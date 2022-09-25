@@ -3,6 +3,7 @@ abstract class Stmt {
 public abstract R Accept<R>(IVisitor<R> visitor);   public interface IVisitor<R>
 {
       public R VisitBlock(Stmt.Block block);
+      public R VisitClassObj(Stmt.ClassObj classobj);
       public R VisitExpression(Stmt.Expression expression);
       public R VisitPrint(Stmt.Print print);
       public R VisitVar(Stmt.Var var);
@@ -18,6 +19,16 @@ this.statements = statements;
 }
 public override R Accept<R>(IVisitor<R> visitor){
 return visitor.VisitBlock(this);}
+}
+public class ClassObj : Stmt {
+public readonly Token name;
+public readonly List<Stmt.Function> methods;
+public ClassObj (Token name, List<Stmt.Function> methods) {
+this.name = name;
+this.methods = methods;
+}
+public override R Accept<R>(IVisitor<R> visitor){
+return visitor.VisitClassObj(this);}
 }
 public class Expression : Stmt {
 public readonly Expr expr;
