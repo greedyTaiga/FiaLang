@@ -5,6 +5,8 @@ namespace FiaLang
     {
         private static readonly Interpreter interpreter = new Interpreter();
         private static bool errorEncountered = false;
+        public static TextWriter writer = Console.Out;
+        public static TextReader reader = Console.In;
         public static void Main(string[] args)
         {    
 
@@ -24,7 +26,7 @@ namespace FiaLang
                 else
                 {
                     text = null;
-                    Console.WriteLine("Invalid path");
+                    writer.WriteLine("Invalid path");
                     return;
                 }
 
@@ -33,24 +35,12 @@ namespace FiaLang
                     Run(text);
                 } else
                 {
-                    Console.WriteLine("Invalid File");
+                    writer.WriteLine("Invalid File");
                 }
             } 
         }
 
-        private static void RunPrompt()
-        {
-            while (true)
-            {
-                Console.Write(">");
-                string? line = Console.ReadLine();
-
-                if (line == null) break;
-
-                Run(line);
-            }
-        }
-        private static void Run(string text)
+        public static void Run(string text)
         {
             errorEncountered = false;
 
@@ -69,10 +59,22 @@ namespace FiaLang
             interpreter.Interpret(statements);
         }
 
+        private static void RunPrompt()
+        {
+            while (true)
+            {
+                writer.Write(">");
+                string? line = reader.ReadLine();
+
+                if (line == null) break;
+
+                Run(line);
+            }
+        }
         internal static void Error(string message, int line)
         {
             errorEncountered = true;
-            Console.WriteLine($"On line {line}, {message}");
+            writer.WriteLine($"On line {line}, {message}");
         }
     }
 }

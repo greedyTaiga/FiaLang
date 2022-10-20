@@ -130,7 +130,7 @@ namespace FiaLang
         public None VisitPrint(Stmt.Print print)
         {
             var val = Evaluate(print.val);
-            Console.WriteLine(Stringify(val));
+            Fia.writer.WriteLine(Stringify(val));
 
             return new None();
         }
