@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Fia.Error;
+using FiaLang.Error;
 
-namespace Fia
+namespace FiaLang
 {
     internal class FiaInstance
     {

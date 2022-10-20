@@ -1,7 +1,7 @@
 ﻿using System; 
-using static Fia.TokenType;
+using static FiaLang.TokenType;
 
-namespace Fia
+namespace FiaLang
 {
     internal class Parser
     {

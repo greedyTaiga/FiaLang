@@ -1,4 +1,4 @@
-﻿namespace Fia
+﻿namespace FiaLang
 {
     enum TokenType
     {

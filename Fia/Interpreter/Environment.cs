@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Fia.Error;
+using FiaLang.Error;
 
-namespace Fia
+namespace FiaLang
 {
     internal class Environment
     {

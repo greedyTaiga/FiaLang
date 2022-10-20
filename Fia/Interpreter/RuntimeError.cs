@@ -1,4 +1,4 @@
-﻿namespace Fia.Error
+﻿namespace FiaLang.Error
 {
     internal class RuntimeError : Exception
     {

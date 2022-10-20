@@ -1,4 +1,4 @@
-namespace Fia {
+namespace FiaLang {
 abstract class Expr {
 public abstract R Accept<R>(IVisitor<R> visitor);   public interface IVisitor<R>
 {

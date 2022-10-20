@@ -1,4 +1,4 @@
-﻿namespace Fia
+﻿namespace FiaLang
 {
     internal class Token
     {

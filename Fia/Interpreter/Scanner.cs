@@ -1,6 +1,6 @@
-﻿using static Fia.TokenType;
+﻿using static FiaLang.TokenType;
 
-namespace Fia
+namespace FiaLang
 {
     internal class Scanner
     {
@@ -201,12 +201,10 @@ namespace Fia
 
         private void SkipLine()
         {
-            Console.WriteLine("Trying to skip a line.");
             while (current < source.Length && source[current] != '\n')
             {
                 current++;
             }
-            Console.WriteLine("Success.");
             if (current < source.Length) current++;
             line++;
             

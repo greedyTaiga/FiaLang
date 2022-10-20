@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fia
+namespace FiaLang
 {
     internal class FiaFunction : IFiaCallable
     {

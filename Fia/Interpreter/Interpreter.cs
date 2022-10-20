@@ -1,8 +1,8 @@
-﻿using static Fia.TokenType;
-using Fia.Error;
-using Fia.Other;
+﻿using static FiaLang.TokenType;
+using FiaLang.Error;
+using FiaLang.Other;
 
-namespace Fia
+namespace FiaLang
 {
     internal class Interpreter : Expr.IVisitor<Object?>, Stmt.IVisitor<None>
     {

@@ -1,5 +1,5 @@
 ﻿//C# doesn't allow void to be used in generics, so this empty class object is used instead
-namespace Fia.Other
+namespace FiaLang.Other
 {
     internal class None
     {

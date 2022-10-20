@@ -1,20 +1,12 @@
 ﻿using System;
-namespace Fia
+namespace FiaLang
 {
     public class Fia
     {
         private static readonly Interpreter interpreter = new Interpreter();
         private static bool errorEncountered = false;
-
-        
         public static void Main(string[] args)
-        {
-            var p = @"C:\Users\alger\Desktop\Prog\C# Projects\FiaLang\DevelopmentTools\test.fia";
-            var t = File.ReadAllText(p);
-            Run(t);
-            return;
-
-            
+        {    
 
             if (args.Length == 0)
             {

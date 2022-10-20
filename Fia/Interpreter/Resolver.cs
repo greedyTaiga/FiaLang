@@ -1,7 +1,7 @@
 ﻿using System;
-using Fia.Other;
+using FiaLang.Other;
 
-namespace Fia
+namespace FiaLang
 {
     internal class Resolver : Expr.IVisitor<None>, Stmt.IVisitor<None>
     {
